@@ -1,0 +1,333 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPO Control | Gestión de inventarios</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <h1>e.<span>P</span>O.</h1>
+            <small>EMPAQUES PLÁSTICOS DE OCCIDENTE</small>
+        </div>
+
+        <p class="menu-title">MENÚ PRINCIPAL</p>
+
+        <nav>
+            <button class="nav-btn active" data-page="dashboard">▦ Panel principal</button>
+            <button class="nav-btn" data-page="inventory">▤ Inventario</button>
+            <button class="nav-btn" data-page="movements">⇄ Movimientos</button>
+            <button class="nav-btn" data-page="quality">♻ Calidad y sobrantes</button>
+            <button class="nav-btn" data-page="reports">▥ Reportes</button>
+        </nav>
+
+        <div class="sidebar-note">
+            <b>Prototipo demostrativo</b>
+            Información de ejemplo para representar el funcionamiento de EPO Control.
+        </div>
+    </aside>
+
+    <main>
+        <header class="topbar">
+            <span>EPO Control / <b id="page-title">Panel principal</b></span>
+            <div class="user">
+                <div class="avatar">AL</div>
+                <div>
+                    <b>Administrador</b>
+                    <small>Usuario de demostración</small>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+
+            <!-- PANEL PRINCIPAL -->
+            <section id="dashboard" class="page active">
+                <div class="page-header">
+                    <div>
+                        <span class="eyebrow">SISTEMA INTEGRAL DE INVENTARIOS</span>
+                        <h2>Panel principal</h2>
+                        <p>Resumen general del inventario de E.P.O.</p>
+                    </div>
+                    <button class="btn primary" onclick="openModal('entry')">
+                        + Registrar entrada
+                    </button>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <span>Referencias registradas</span>
+                        <strong id="total-materials">8</strong>
+                        <small>Materiales en el sistema</small>
+                    </div>
+                    <div class="stat-card">
+                        <span>Existencias totales</span>
+                        <strong id="total-stock">12.500</strong>
+                        <small>Cantidades disponibles</small>
+                    </div>
+                    <div class="stat-card">
+                        <span>Novedades de calidad</span>
+                        <strong id="total-issues">2</strong>
+                        <small>Registros por revisar</small>
+                    </div>
+                    <div class="stat-card">
+                        <span>Sobrantes reutilizables</span>
+                        <strong id="total-surplus">540 kg</strong>
+                        <small>Material aprovechable</small>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Accesos rápidos</h3>
+                    <div class="quick-grid">
+                        <button class="quick" onclick="openModal('entry')">
+                            <span>📥</span>
+                            <b>Registrar entrada</b>
+                            <small>Ingreso de materiales</small>
+                        </button>
+                        <button class="quick" onclick="openModal('exit')">
+                            <span>📤</span>
+                            <b>Registrar salida</b>
+                            <small>Consumo o despacho</small>
+                        </button>
+                        <button class="quick" onclick="showPage('inventory')">
+                            <span>🔎</span>
+                            <b>Consultar inventario</b>
+                            <small>Existencias y ubicación</small>
+                        </button>
+                        <button class="quick" onclick="openModal('quality')">
+                            <span>⚠️</span>
+                            <b>Reportar novedad</b>
+                            <small>Calidad y sobrantes</small>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Actividad reciente</h3>
+                    <div id="recent-activity"></div>
+                </div>
+
+                <div class="notice">
+                    💡 <div><b>Recordatorio:</b> Actualiza el inventario cada vez que se reciba, consuma o identifique un material defectuoso.</div>
+                </div>
+            </section>
+
+            <!-- INVENTARIO -->
+            <section id="inventory" class="page">
+                <div class="page-header">
+                    <div>
+                        <span class="eyebrow">CONSULTA Y LOCALIZACIÓN</span>
+                        <h2>Inventario</h2>
+                        <p>Consulta las cantidades y ubicaciones de los materiales.</p>
+                    </div>
+                    <button class="btn primary" onclick="openModal('new')">
+                        + Nuevo material
+                    </button>
+                </div>
+
+                <div class="panel">
+                    <div class="toolbar">
+                        <input type="text" id="inventory-search"
+                               placeholder="Buscar material, código o ubicación..."
+                               oninput="renderInventory()">
+
+                        <select id="category-filter" onchange="renderInventory()">
+                            <option value="">Todas las categorías</option>
+                            <option>Materia prima</option>
+                            <option>Empaque</option>
+                            <option>Producto terminado</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Material</th>
+                                    <th>Categoría</th>
+                                    <th>Cantidad</th>
+                                    <th>Ubicación</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MOVIMIENTOS -->
+            <section id="movements" class="page">
+                <div class="page-header">
+                    <div>
+                        <span class="eyebrow">TRAZABILIDAD</span>
+                        <h2>Movimientos</h2>
+                        <p>Historial de entradas y salidas de materiales.</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn secondary" onclick="openModal('entry')">+ Entrada</button>
+                        <button class="btn primary" onclick="openModal('exit')">- Salida</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="toolbar">
+                        <input type="text" id="movement-search"
+                               placeholder="Buscar movimiento..."
+                               oninput="renderMovements()">
+
+                        <select id="movement-filter" onchange="renderMovements()">
+                            <option value="">Todos los movimientos</option>
+                            <option>Entrada</option>
+                            <option>Salida</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Material</th>
+                                    <th>Cantidad</th>
+                                    <th>Destino / proveedor</th>
+                                    <th>Responsable</th>
+                                </tr>
+                            </thead>
+                            <tbody id="movement-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CALIDAD Y SOBRANTES -->
+            <section id="quality" class="page">
+                <div class="page-header">
+                    <div>
+                        <span class="eyebrow">CONTROL Y APROVECHAMIENTO</span>
+                        <h2>Calidad y sobrantes</h2>
+                        <p>Control de materiales defectuosos y sobrantes reutilizables.</p>
+                    </div>
+                    <button class="btn primary" onclick="openModal('quality')">
+                        + Registrar novedad
+                    </button>
+                </div>
+
+                <div class="two-columns">
+                    <div class="panel">
+                        <h3>Novedades de calidad</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Material</th>
+                                        <th>Cantidad</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="quality-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <h3>Sobrantes registrados</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Material</th>
+                                        <th>Cantidad</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="surplus-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notice">
+                    ♻️ <div><b>Menos desperdicio, más valor.</b> Los sobrantes registrados pueden identificarse para facilitar su aprovechamiento.</div>
+                </div>
+            </section>
+
+            <!-- REPORTES -->
+            <section id="reports" class="page">
+                <div class="page-header">
+                    <div>
+                        <span class="eyebrow">VISUALIZACIÓN Y SEGUIMIENTO</span>
+                        <h2>Reportes</h2>
+                        <p>Indicadores generales para apoyar las decisiones.</p>
+                    </div>
+                    <button class="btn secondary" onclick="window.print()">
+                        Imprimir resumen
+                    </button>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <span>Referencias</span>
+                        <strong id="report-materials">8</strong>
+                    </div>
+                    <div class="stat-card">
+                        <span>Movimientos</span>
+                        <strong id="report-movements">4</strong>
+                    </div>
+                    <div class="stat-card">
+                        <span>Novedades</span>
+                        <strong id="report-issues">2</strong>
+                    </div>
+                    <div class="stat-card">
+                        <span>Sobrantes</span>
+                        <strong id="report-surplus">540 kg</strong>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3>Resumen del inventario</h3>
+                    <div id="report-summary"></div>
+                </div>
+            </section>
+
+            <footer>
+                EPO Control · Prototipo de baja fidelidad · Datos ficticios de demostración.
+            </footer>
+
+        </div>
+    </main>
+</div>
+
+<!-- VENTANA DE FORMULARIOS -->
+<div class="modal-backdrop" id="modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modal-title">Registrar información</h3>
+            <button class="close" onclick="closeModal()">×</button>
+        </div>
+
+        <form id="main-form">
+            <div id="form-fields" class="form-grid"></div>
+
+            <div class="form-actions">
+                <button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button>
+                <button type="submit" class="btn primary">Guardar registro</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
